@@ -40,6 +40,42 @@ void ppmDrawPixel(PPM img, int x, int y, int32_t col)
 	img->p[y][x].b = (col>>16 & 0xFF);
 }
 
+void ppmDrawLine(PPM img, point p1, point p2, int32_t col)
+{
+	int xmin, xmax;
+	int ymin, ymax;
+	int i,j;
+	float a,b,ii,jj;
+	
+	if (p1.x < p2.x) {xmin=p1.x; xmax=p2.x;} else{xmin=p2.x; xmax=p1.x;}
+	if (p1.y < p2.y) {ymin=p1.y; ymax=p2.y;} else{ymin=p2.y; ymax=p1.y;}
+	
+	if (xmin==xmax) for (j=ymin;j<=ymax;j++) ppmDrawPixel(img,xmin,j,col);
+	if (ymin==ymax) for (i=xmin;i<=xmax;i++) ppmDrawPixel(img,i,ymin,col);
+	
+	if ((xmax-xmin >= ymax-ymin) && (ymax-ymin>0)) {
+		a = (float)(p1.y-p2.y) / ((float)(p1.x-p2.x));
+		b = p1.y - a*p1.x;
+		for (i=xmin;i<=xmax;i++) {
+			jj = a*i+b;
+			j = jj;
+			if (((jj-j) > 0.5) && (j < img->h-1)) j++;
+			ppmDrawPixel(img, i, j, col);
+		}
+	}
+	
+	if ((ymax-ymin > xmax-xmin) && (xmax-xmin>0)) {
+		a = (float)(p1.y-p2.y) / ((float)(p1.x-p2.x));
+		b = p1.y - a*p1.x;
+		for (j=ymin;j<=ymax;j++) {
+			ii = (j-b)/a;
+			i = ii;
+			if (((ii-i) > 0.5) && (i < img->w-1)) i++;
+			ppmDrawPixel(img, i, j, col);
+		}
+	}
+}
+
 PPM ppmOpen(char *filename)
 {
 	FILE *fimg;
@@ -129,7 +165,7 @@ int ppmExport(PPM img)
 	fprintf(f, "P3\n%d %d\n255\n", img->w, img->h);
 	
 	//Pixels
-	for(int j=0; j < img->h; j++)
+	for(int j=img->h-1; j >= 0; j--)
 	{
 		for(int i=0; i<img->w; i++)
 		{
