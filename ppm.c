@@ -35,9 +35,12 @@ PPM ppmCreate(char *filename, int x, int y)
 
 void ppmDrawPixel(PPM img, int x, int y, int32_t col)
 {
-	img->p[y][x].r = (col & 0xFF);
-	img->p[y][x].g = (col>>8 & 0xFF);
-	img->p[y][x].b = (col>>16 & 0xFF);
+	if(x < img->w && x >= 0 && y < img->h && y >= 0)
+	{
+		img->p[y][x].r = (col & 0xFF);
+		img->p[y][x].g = (col>>8 & 0xFF);
+		img->p[y][x].b = (col>>16 & 0xFF);
+	}
 }
 
 void ppmDrawLine(PPM img, point p1, point p2, int32_t col)
